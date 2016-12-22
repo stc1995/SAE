@@ -76,6 +76,16 @@ class SparseAutoEncoder(object):
 
         delta3 = numpy.multiply(diff, numpy.multiply(output_layer, 1 - output_layer))
         deltaKL = self.beta * (-self.rho / rho_cap + (1 - self.rho) / (1 - rho_cap))
+
+        print(type(deltaKL))
+        print(deltaKL.shape)
+        print(type(numpy.matrix(deltaKL)))
+        print(numpy.matrix(deltaKL).shape)
+        print(type((numpy.transpose(numpy.matrix(deltaKL)))))
+        print((numpy.transpose(numpy.matrix(deltaKL))).shape)
+        print(type(numpy.dot(numpy.transpose(W2), delta3)))
+        print(numpy.dot(numpy.transpose(W2), delta3).shape)
+
         delta2 = numpy.multiply(numpy.dot(numpy.transpose(W2), delta3) + numpy.transpose(numpy.matrix(deltaKL)),
                                 numpy.multiply(hidden_layer, 1 - hidden_layer))
 
@@ -194,7 +204,9 @@ def executeSparseAutoEncoder():
 
     """ Visualize the obtained optimal W1 weights """
 
-    visualizeW1(opt_W1, hid_patch_side, vis_patch_side)
+    visualizeW1(opt_W1, vis_patch_side , hid_patch_side)
+
+    print(opt_W1)
 
 
 executeSparseAutoEncoder()
