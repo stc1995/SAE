@@ -1,0 +1,130 @@
+﻿1、关于cost中大量输出的解释
+print(type(deltaKL))
+print(deltaKL.shape)
+print(type(numpy.matrix(deltaKL)))
+print(numpy.matrix(deltaKL).shape)
+print(type((numpy.transpose(numpy.matrix(deltaKL)))))
+print((numpy.transpose(numpy.matrix(deltaKL))).shape)
+print(type(numpy.dot(numpy.transpose(W2), delta3)))
+print(numpy.dot(numpy.transpose(W2), delta3).shape)
+
+<class 'numpy.ndarray'>
+(25,)
+<class 'numpy.matrixlib.defmatrix.matrix'>
+(1, 25)
+<class 'numpy.matrixlib.defmatrix.matrix'>
+(25, 1)
+<class 'numpy.ndarray'>
+(25, 10000)
+
+自己的测试：
+In [30]: numpy.ones((5,10))
+Out[30]:
+array([[ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+       [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+       [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+       [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.],
+       [ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.]])
+
+In [31]: f = numpy.ones((5,10))
+
+In [32]: g = numpy.ones((5,1))
+
+In [33]: g
+Out[33]:
+array([[ 1.],
+       [ 1.],
+       [ 1.],
+       [ 1.],
+       [ 1.]])
+
+In [34]: f+g
+Out[34]:
+array([[ 2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.],
+       [ 2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.],
+       [ 2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.],
+       [ 2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.],
+       [ 2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.,  2.]])
+
+
+In [37]: h = numpy.array([1,2,3,4,5])
+
+In [38]: h
+Out[38]: array([1, 2, 3, 4, 5])
+
+In [40]: h.shape
+Out[40]: (5,)
+
+In [41]: h.transpose()
+Out[41]: array([1, 2, 3, 4, 5])
+
+
+
+In [47]: h = numpy.array([[1,2,3,4,5]])
+
+In [61]: h
+Out[61]: array([[1, 2, 3, 4, 5]])
+
+In [51]: h.transpose()
+Out[51]:
+array([[1],
+       [2],
+       [3],
+       [4],
+       [5]])
+
+In [52]: h.shape
+Out[52]: (1, 5)
+
+In [58]: i = numpy.array([[1],[2],[3],[4],[5]])
+
+In [59]: i
+Out[59]:
+array([[1],
+       [2],
+       [3],
+       [4],
+       [5]])
+
+In [60]: i.shape
+Out[60]: (5, 1)
+
+
+
+2、numpy.flatiter
+class numpy.flatiter[source]
+Flat iterator object to iterate over arrays.
+A flatiter iterator is returned by x.flat for any array x. It allows iterating over the array as if it were a 1-D array, either in a for-loop or by calling its next method.
+Iteration is done in row-major, C-style order (the last index varying the fastest). The iterator can also be indexed using basic slicing or advanced indexing.
+Examples
+>>>
+>>> x = np.arange(6).reshape(2, 3)
+>>> fl = x.flat
+>>> type(fl)
+<type 'numpy.flatiter'>
+>>> for item in fl:
+...     print(item)
+...
+0
+1
+2
+3
+4
+5
+>>>
+>>> fl[2:4]
+array([2, 3])
+
+
+In [64]: x = numpy.arange(6).reshape(2, 3)
+
+In [65]: x
+Out[65]:
+array([[0, 1, 2],
+       [3, 4, 5]])
+
+In [66]: for i in x:
+    ...:     print(i)
+    ...:
+[0 1 2]
+[3 4 5]
