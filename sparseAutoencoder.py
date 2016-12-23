@@ -133,8 +133,12 @@ def normalizeDataset(dataset):
 
 def loadDataset(num_patches, patch_side):
 
-    images = scipy.io.loadmat("IMAGES.mat")
-    images = images['IMAGES']
+    # images = scipy.io.loadmat("IMAGES.mat")
+    # images = images['IMAGES']
+    # images = scipy.io.loadmat("d:/RecentlyUsed/Graduation Project/adData.mat")
+    # images = images['adData']
+    images = scipy.io.loadmat("d:/RecentlyUsed/Graduation Project/midData.mat")
+    images = images['midData']
 
     """ Initialize dataset as array of zeros """
     dataset = numpy.zeros((patch_side*patch_side, num_patches))
@@ -143,17 +147,27 @@ def loadDataset(num_patches, patch_side):
         There are 10 images of size 512 X 512 """
     # rand = numpy.random.RandomState(int(time.time()))
     rand = numpy.random.RandomState(1000000)
-    image_indices = rand.randint(512 - patch_side, size = (num_patches, 2))
-    image_number = rand.randint(10, size = num_patches)
+
+    # image_indices = rand.randint(512 - patch_side, size = (num_patches, 2))
+    image_indices1 = rand.randint(81 - patch_side, size=(num_patches))
+    image_indices2 = rand.randint(97 - patch_side, size=(num_patches))
+    image_indices3 = rand.randint(83 - patch_side, size=(num_patches))
+    # image_number = rand.randint(10, size = num_patches)
+    image_number = rand.randint(116, size=num_patches)
 
     """ Sample 'num_patches' random image patches """
     for i in range(num_patches):
         """ Initialize indices for patch extraction """
-        index1 = image_indices[i, 0]
-        index2 = image_indices[i, 1]
-        index3 = image_number[i]
+        # index1 = image_indices[i, 0]
+        # index2 = image_indices[i, 1]
+        # index3 = image_number[i]
+        index1 = image_indices1[i]
+        index2 = image_indices2[i]
+        index3 = image_indices3[i]
+        index4 = image_number[i]
         """ Extract patch and store it as a column """
-        patch = images[index1:index1+patch_side, index2:index2+patch_side, index3]
+        # patch = images[index1:index1+patch_side, index2:index2+patch_side, index3]
+        patch = images[0, index4][3][0][0][4][index1:index1 + patch_side, index2:index2 + patch_side, index3]
         patch = patch.flatten()
         dataset[:, i] = patch
     """ Normalize and return the dataset """
@@ -188,7 +202,7 @@ def executeSparseAutoEncoder():
     lamda = 0.0001
     beta = 3
     num_patches = 10000
-    max_iterations = 1000 # 400
+    max_iterations = 1000  #1000
 
     visible_size = vis_patch_side * vis_patch_side
     hidden_size = hid_patch_side * hid_patch_side
@@ -199,16 +213,21 @@ def executeSparseAutoEncoder():
 
     """ Run the L-BFGS algorithm to get the optimal parameter values """
     opt_solution = scipy.optimize.minimize(encoder.sparseAutoencoderCost, encoder.theta, args=(training_data,),
-                                           method="L-BFGS-B", jac=True, options={"maxiter": max_iterations,  'disp': True})
+                                           method="L-BFGS-B", jac=True, options={"maxiter": max_iterations,  'disp': True})  # , 'gtol': 1e-3
 
     opt_theta = opt_solution.x
     opt_W1 = opt_theta[encoder.limit0: encoder.limit1].reshape(hidden_size, visible_size)
 
     """ Visualize the obtained optimal W1 weights """
 
-    visualizeW1(opt_W1, vis_patch_side , hid_patch_side)
-
-    print(opt_W1)
+    visualizeW1(opt_W1, vis_patch_side, hid_patch_side)
+    # print(type(opt_W1))
+    # print(opt_W1.shape)
+    # print(opt_W1)
+    # print()
+    # print(opt_W1.reshape(1, hidden_size*visible_size))
+    # print(opt_theta[encoder.limit0: encoder.limit1])
+    numpy.savetxt("mid_1000(2).txt", opt_W1, fmt=['%s']*opt_W1.shape[1], newline='\r\n')
 
 
 executeSparseAutoEncoder()
