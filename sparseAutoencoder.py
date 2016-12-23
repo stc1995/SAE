@@ -28,15 +28,16 @@ class SparseAutoEncoder(object):
         """ Initialize Neural Network weights randomly
             W1, W2 values are chosen in the range [-r, r] """
         r = math.sqrt(6) / math.sqrt(hidden_size + visible_size + 1)
-        rand = numpy.random.RandomState(int(time.time()))
+        # rand = numpy.random.RandomState(int(time.time()))
+        rand = numpy.random.RandomState(1000000)
 
         W1 = numpy.asarray(rand.uniform(low=-r, high=r, size=(hidden_size, visible_size)))
         W2 = numpy.asarray(rand.uniform(low=-r, high=r, size=(visible_size, hidden_size)))
 
         """ Bias values are initialized to zero """
 
-        b1 = numpy.zeros(hidden_size)
-        b2 = numpy.zeros(visible_size)
+        b1 = numpy.zeros((hidden_size, 1))
+        b2 = numpy.zeros((visible_size, 1))
 
         """ Create 'theta' by unrolling W1, W2, b1, b2 """
 
@@ -45,7 +46,7 @@ class SparseAutoEncoder(object):
     """ Returns elementwise sigmoid output of input array """
 
     def sigmoid(self, x):
-        return 1 / (1 + numpy.exp(x))
+        return (1 / (1 + numpy.exp(-x)))
 
     """ Returns the cost of the Autoencoder and gradient at a particular 'theta' """
 
@@ -68,7 +69,7 @@ class SparseAutoEncoder(object):
         """ Compute intermediate difference values using Backpropagation algorithm """
         diff = output_layer - input
         outputCost = 1 / (2 * input.shape[1]) * numpy.sum(numpy.multiply(diff, diff))
-        regularizationCost = self.lamda / (2 * input.shape[1]) * (numpy.sum(numpy.multiply(W1, W1)) +
+        regularizationCost = 0.5 * self.lamda * (numpy.sum(numpy.multiply(W1, W1)) +
                                                                   numpy.sum(numpy.multiply(W2, W2)))
         KL_divergence = self.beta * numpy.sum(self.rho * numpy.log(self.rho / rho_cap) +
                                               (1 - self.rho) * numpy.log((1 - self.rho) / (1 - rho_cap)))
@@ -77,14 +78,14 @@ class SparseAutoEncoder(object):
         delta3 = numpy.multiply(diff, numpy.multiply(output_layer, 1 - output_layer))
         deltaKL = self.beta * (-self.rho / rho_cap + (1 - self.rho) / (1 - rho_cap))
 
-        print(type(deltaKL))
-        print(deltaKL.shape)
-        print(type(numpy.matrix(deltaKL)))
-        print(numpy.matrix(deltaKL).shape)
-        print(type((numpy.transpose(numpy.matrix(deltaKL)))))
-        print((numpy.transpose(numpy.matrix(deltaKL))).shape)
-        print(type(numpy.dot(numpy.transpose(W2), delta3)))
-        print(numpy.dot(numpy.transpose(W2), delta3).shape)
+        # print(type(deltaKL))
+        # print(deltaKL.shape)
+        # print(type(numpy.matrix(deltaKL)))
+        # print(numpy.matrix(deltaKL).shape)
+        # print(type((numpy.transpose(numpy.matrix(deltaKL)))))
+        # print((numpy.transpose(numpy.matrix(deltaKL))).shape)
+        # print(type(numpy.dot(numpy.transpose(W2), delta3)))
+        # print(numpy.dot(numpy.transpose(W2), delta3).shape)
 
         delta2 = numpy.multiply(numpy.dot(numpy.transpose(W2), delta3) + numpy.transpose(numpy.matrix(deltaKL)),
                                 numpy.multiply(hidden_layer, 1 - hidden_layer))
@@ -92,8 +93,8 @@ class SparseAutoEncoder(object):
         """ Compute the gradient values by averaging partial derivatives
             Partial derivatives are averaged over all training examples """
         W2grad = 1 / input.shape[1] * numpy.dot(delta3, numpy.transpose(hidden_layer)) + self.lamda * W2
-        b2grad = 1 / input.shape[1] * numpy.sum(delta3, axis=1)
         W1grad = 1 / input.shape[1] * numpy.dot(delta2, numpy.transpose(input)) + self.lamda * W1
+        b2grad = 1 / input.shape[1] * numpy.sum(delta3, axis=1)
         b1grad = 1 / input.shape[1] * numpy.sum(delta2, axis=1)
 
         """ Transform numpy matrices into arrays """
@@ -140,7 +141,8 @@ def loadDataset(num_patches, patch_side):
 
     """ Initialize random numbers for random sampling of images
         There are 10 images of size 512 X 512 """
-    rand = numpy.random.RandomState(int(time.time()))
+    # rand = numpy.random.RandomState(int(time.time()))
+    rand = numpy.random.RandomState(1000000)
     image_indices = rand.randint(512 - patch_side, size = (num_patches, 2))
     image_number = rand.randint(10, size = num_patches)
 
@@ -186,7 +188,7 @@ def executeSparseAutoEncoder():
     lamda = 0.0001
     beta = 3
     num_patches = 10000
-    max_iterations = 400
+    max_iterations = 1000 # 400
 
     visible_size = vis_patch_side * vis_patch_side
     hidden_size = hid_patch_side * hid_patch_side
@@ -197,7 +199,7 @@ def executeSparseAutoEncoder():
 
     """ Run the L-BFGS algorithm to get the optimal parameter values """
     opt_solution = scipy.optimize.minimize(encoder.sparseAutoencoderCost, encoder.theta, args=(training_data,),
-                                           method="L-BFGS-B", jac=True, options={"maxiter": max_iterations})
+                                           method="L-BFGS-B", jac=True, options={"maxiter": max_iterations,  'disp': True})
 
     opt_theta = opt_solution.x
     opt_W1 = opt_theta[encoder.limit0: encoder.limit1].reshape(hidden_size, visible_size)
