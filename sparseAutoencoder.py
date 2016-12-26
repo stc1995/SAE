@@ -137,11 +137,11 @@ def loadDataset(num_patches, patch_side):
     # images = images['IMAGES']
     # images = scipy.io.loadmat("d:/RecentlyUsed/Graduation Project/adData.mat")
     # images = images['adData']
-    images = scipy.io.loadmat("d:/RecentlyUsed/Graduation Project/midData.mat")
-    images = images['midData']
+    images = scipy.io.loadmat("d:/RecentlyUsed/Graduation Project/oldData.mat")
+    images = images['oldData']
 
     """ Initialize dataset as array of zeros """
-    dataset = numpy.zeros((patch_side*patch_side, num_patches))
+    dataset = numpy.zeros((patch_side*patch_side*patch_side, num_patches))
 
     """ Initialize random numbers for random sampling of images
         There are 10 images of size 512 X 512 """
@@ -153,7 +153,7 @@ def loadDataset(num_patches, patch_side):
     image_indices2 = rand.randint(97 - patch_side, size=(num_patches))
     image_indices3 = rand.randint(83 - patch_side, size=(num_patches))
     # image_number = rand.randint(10, size = num_patches)
-    image_number = rand.randint(116, size=num_patches)
+    image_number = rand.randint(98, size=num_patches)
 
     """ Sample 'num_patches' random image patches """
     for i in range(num_patches):
@@ -167,7 +167,7 @@ def loadDataset(num_patches, patch_side):
         index4 = image_number[i]
         """ Extract patch and store it as a column """
         # patch = images[index1:index1+patch_side, index2:index2+patch_side, index3]
-        patch = images[0, index4][3][0][0][4][index1:index1 + patch_side, index2:index2 + patch_side, index3]
+        patch = images[0, index4][3][0][0][4][index1:index1 + patch_side, index2:index2 + patch_side, index3:index3 + patch_side]
         patch = patch.flatten()
         dataset[:, i] = patch
     """ Normalize and return the dataset """
@@ -179,12 +179,12 @@ def loadDataset(num_patches, patch_side):
 """ Visualizes the obtained optimal W1 values as images """
 def visualizeW1(opt_W1, vis_patch_side, hid_patch_side):
     """ Add the weights as a matrix of images """
-    figure, axes = matplotlib.pyplot.subplots(nrows= hid_patch_side, ncols= hid_patch_side)
+    figure, axes = matplotlib.pyplot.subplots(nrows = hid_patch_side*hid_patch_side, ncols= hid_patch_side)
     index = 0
 
     for axis in axes.flat:
         """ Add row of weights as an image to the plot """
-        image = axis.imshow(opt_W1[index, :].reshape(vis_patch_side, vis_patch_side), cmap=matplotlib.pyplot.cm.gray, interpolation = 'nearest')
+        image = axis.imshow(opt_W1[index, :].reshape(vis_patch_side*vis_patch_side, vis_patch_side), cmap=matplotlib.pyplot.cm.gray, interpolation = 'nearest')
         axis.set_frame_on(False)
         axis.set_axis_off()
         index += 1
@@ -202,10 +202,10 @@ def executeSparseAutoEncoder():
     lamda = 0.0001
     beta = 3
     num_patches = 10000
-    max_iterations = 1000  #1000
+    max_iterations = 400  #1000
 
-    visible_size = vis_patch_side * vis_patch_side
-    hidden_size = hid_patch_side * hid_patch_side
+    visible_size = vis_patch_side * vis_patch_side * vis_patch_side
+    hidden_size = hid_patch_side * hid_patch_side * hid_patch_side
     """ Load randomly sampled image patches as dataset """
     training_data = loadDataset(num_patches, vis_patch_side)
     """ Initialize the Autoencoder with the above parameters """
@@ -217,17 +217,19 @@ def executeSparseAutoEncoder():
 
     opt_theta = opt_solution.x
     opt_W1 = opt_theta[encoder.limit0: encoder.limit1].reshape(hidden_size, visible_size)
+    opt_b1 = opt_theta[encoder.limit2: encoder.limit3].reshape(hidden_size, 1)
 
     """ Visualize the obtained optimal W1 weights """
 
-    visualizeW1(opt_W1, vis_patch_side, hid_patch_side)
+    # visualizeW1(opt_W1, vis_patch_side, hid_patch_side)
     # print(type(opt_W1))
     # print(opt_W1.shape)
     # print(opt_W1)
     # print()
     # print(opt_W1.reshape(1, hidden_size*visible_size))
     # print(opt_theta[encoder.limit0: encoder.limit1])
-    numpy.savetxt("mid_1000(2).txt", opt_W1, fmt=['%s']*opt_W1.shape[1], newline='\r\n')
+    numpy.savetxt("old_400_W1.txt", opt_W1, fmt=['%s']*opt_W1.shape[1], newline='\r\n')
+    numpy.savetxt("old_400_b1.txt", opt_b1, fmt=['%s']*opt_b1.shape[1], newline='\r\n')
 
 
 executeSparseAutoEncoder()
